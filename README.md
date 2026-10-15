@@ -1,0 +1,56 @@
+# Brand Studio Hub
+
+One web app for the team with three tools:
+
+- **Video Studio**: build short animated videos from scenes, in a brand look (LocomotePro, LocomotePro Light, Surfaced, Surfaced Ink) or a general look. Add a logo and music, draft scenes with AI, and download the finished video (MP4 in Chrome and Edge, WebM elsewhere).
+- **LocomotePro**: colours, type, rules, an AI brand writer (English and Bangla), logos and graphics to download, the full brand book and design guide.
+- **Surfaced Social**: the same for Surfaced, including app screenshots, App Store images, social posts and the Facebook cover.
+
+Nobody on the team needs a Claude account. The AI runs on the server with your key, and the key never reaches the browser.
+
+## Deploy
+
+Full step-by-step instructions are in `DEPLOY.md`. In short: put this folder in a GitHub repository, create a Render Blueprint from it, and paste your keys.
+
+## AI writers
+
+You can set up Claude, Gemini or both. With both, the **AI writer** menu in the app lets each person choose Claude, Gemini or Auto. Auto tries the default first (`DEFAULT_AI`) and switches to the other if it fails, so drafting keeps working if one service is down or out of credit. The app shows which writer produced each draft.
+
+| Variable | What it does |
+| --- | --- |
+| `ANTHROPIC_API_KEY` | Claude API key from console.anthropic.com. Pay as you go, separate from a Claude Max plan. |
+| `GEMINI_API_KEY` | Gemini API key from aistudio.google.com. Has a free tier. |
+| `DEFAULT_AI` | `claude` or `gemini`: which one Auto tries first. |
+| `CLAUDE_MODEL` | Defaults to `claude-sonnet-5-5`. `claude-haiku-5-5` is much cheaper. |
+| `GEMINI_MODEL` | Defaults to `gemini-3.6-flash`. |
+| `TEAM_PASSWORD` | The browser asks for it before opening the hub (any username). Recommended. |
+| `RATE_LIMIT` | AI requests per person per 10 minutes. Defaults to 40. |
+
+Claude requests cache the brand guide, so repeated requests for the same brand cost less.
+
+## Updating brand content
+
+Everything brand-specific lives in `brands/<brand>/`:
+
+- `README.md`: the brand book. The AI writer reads it on every request, so voice rules and facts written here shape all drafts.
+- `how-to-use.md`: the design guide.
+- `tokens.json`: exact colour, type, spacing and radius values.
+- `assets/` and `manifest.json`: downloadable files. To add one, put the file in the right `assets/<group>/` folder and add an entry to `manifest.json`.
+
+Edit, commit to GitHub, and Render redeploys automatically.
+
+## Run it on your computer
+
+```
+npm install
+cp .env.example .env    # then fill in one or both keys
+node --env-file=.env server.js
+```
+
+Open http://localhost:3000.
+
+## Notes
+
+- Video export records in real time, so a 30-second video takes about 30 seconds. Keep the tab in front while it records.
+- Scenes are saved in each person's browser. Images and music are not kept between visits.
+- The interactive component library (buttons, cards, gauges) lives in the Claude design system artifacts; this app carries the brand book, tokens and assets.

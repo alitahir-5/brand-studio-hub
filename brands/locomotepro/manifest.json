@@ -1,0 +1,54 @@
+{
+ "groups": [
+  {
+   "id": "logos",
+   "label": "Logos",
+   "items": [
+    {
+     "name": "logo.png",
+     "file": "assets/logos/logo.png",
+     "size": 27592,
+     "w": 267,
+     "h": 220
+    },
+    {
+     "name": "mark.svg",
+     "file": "assets/logos/mark.svg",
+     "size": 457
+    },
+    {
+     "name": "app-mark.png",
+     "file": "assets/logos/app-mark.png",
+     "size": 1606,
+     "w": 38,
+     "h": 38
+    },
+    {
+     "name": "app-logo-fleet.png",
+     "file": "assets/logos/app-logo-fleet.png",
+     "size": 31848,
+     "w": 430,
+     "h": 932
+    },
+    {
+     "name": "app-logo-fleet-alt.png",
+     "file": "assets/logos/app-logo-fleet-alt.png",
+     "size": 31733,
+     "w": 430,
+     "h": 932
+    }
+   ]
+  },
+  {
+   "id": "graphics",
+   "label": "Graphics",
+   "items": [
+    {
+     "name": "bd-corridor.svg",
+     "file": "assets/graphics/bd-corridor.svg",
+     "size": 7701
+    }
+   ]
+  }
+ ]
+}

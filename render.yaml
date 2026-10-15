@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: brand-studio-hub
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: DEFAULT_AI
+        value: claude
+      - key: CLAUDE_MODEL
+        value: claude-sonnet-5-5
+      - key: GEMINI_MODEL
+        value: gemini-3.6-flash
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: TEAM_PASSWORD
+        sync: false

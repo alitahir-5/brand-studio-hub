@@ -1,0 +1,376 @@
+{
+ "groups": [
+  {
+   "id": "logos",
+   "label": "Logos",
+   "items": [
+    {
+     "name": "logo.png",
+     "file": "assets/logos/logo.png",
+     "size": 28455,
+     "w": 921,
+     "h": 1000
+    },
+    {
+     "name": "logo.jpg",
+     "file": "assets/logos/logo.jpg",
+     "size": 144633,
+     "w": 921,
+     "h": 1000,
+     "thumb": "thumbs/logos-logo.jpg"
+    }
+   ]
+  },
+  {
+   "id": "icons",
+   "label": "Icons",
+   "items": [
+    {
+     "name": "google-play.svg",
+     "file": "assets/icons/google-play.svg",
+     "size": 438
+    }
+   ]
+  },
+  {
+   "id": "screenshots",
+   "label": "App screenshots",
+   "items": [
+    {
+     "name": "1-login.png",
+     "file": "assets/screenshots/1-login.png",
+     "size": 702020,
+     "w": 1242,
+     "h": 2688,
+     "thumb": "thumbs/screenshots-1-login.png"
+    },
+    {
+     "name": "2-home.png",
+     "file": "assets/screenshots/2-home.png",
+     "size": 1698080,
+     "w": 1242,
+     "h": 2688,
+     "thumb": "thumbs/screenshots-2-home.png"
+    },
+    {
+     "name": "3-details.png",
+     "file": "assets/screenshots/3-details.png",
+     "size": 1661426,
+     "w": 1242,
+     "h": 2688,
+     "thumb": "thumbs/screenshots-3-details.png"
+    },
+    {
+     "name": "4-profile.png",
+     "file": "assets/screenshots/4-profile.png",
+     "size": 1514272,
+     "w": 1242,
+     "h": 2688,
+     "thumb": "thumbs/screenshots-4-profile.png"
+    },
+    {
+     "name": "5-settings.png",
+     "file": "assets/screenshots/5-settings.png",
+     "size": 676732,
+     "w": 1242,
+     "h": 2688,
+     "thumb": "thumbs/screenshots-5-settings.png"
+    },
+    {
+     "name": "phone-details.png",
+     "file": "assets/screenshots/phone-details.png",
+     "size": 1427106,
+     "w": 979,
+     "h": 2150,
+     "thumb": "thumbs/screenshots-phone-details.png"
+    },
+    {
+     "name": "phone-home.png",
+     "file": "assets/screenshots/phone-home.png",
+     "size": 1491299,
+     "w": 979,
+     "h": 2150,
+     "thumb": "thumbs/screenshots-phone-home.png"
+    },
+    {
+     "name": "phone-login.png",
+     "file": "assets/screenshots/phone-login.png",
+     "size": 526599,
+     "w": 979,
+     "h": 2150,
+     "thumb": "thumbs/screenshots-phone-login.png"
+    },
+    {
+     "name": "phone-profile.png",
+     "file": "assets/screenshots/phone-profile.png",
+     "size": 1248462,
+     "w": 979,
+     "h": 2150,
+     "thumb": "thumbs/screenshots-phone-profile.png"
+    },
+    {
+     "name": "phone-settings.png",
+     "file": "assets/screenshots/phone-settings.png",
+     "size": 430465,
+     "w": 979,
+     "h": 2150,
+     "thumb": "thumbs/screenshots-phone-settings.png"
+    }
+   ]
+  },
+  {
+   "id": "appstore",
+   "label": "App Store",
+   "items": [
+    {
+     "name": "ipad13-01-signin.png",
+     "file": "assets/appstore/ipad13-01-signin.png",
+     "size": 783171,
+     "w": 2064,
+     "h": 2752,
+     "thumb": "thumbs/appstore-ipad13-01-signin.png"
+    },
+    {
+     "name": "ipad13-02-feed.png",
+     "file": "assets/appstore/ipad13-02-feed.png",
+     "size": 2291993,
+     "w": 2064,
+     "h": 2752,
+     "thumb": "thumbs/appstore-ipad13-02-feed.png"
+    },
+    {
+     "name": "ipad13-03-conversations.png",
+     "file": "assets/appstore/ipad13-03-conversations.png",
+     "size": 2533928,
+     "w": 2064,
+     "h": 2752,
+     "thumb": "thumbs/appstore-ipad13-03-conversations.png"
+    },
+    {
+     "name": "ipad13-04-profile.png",
+     "file": "assets/appstore/ipad13-04-profile.png",
+     "size": 1917841,
+     "w": 2064,
+     "h": 2752,
+     "thumb": "thumbs/appstore-ipad13-04-profile.png"
+    },
+    {
+     "name": "ipad13-05-control.png",
+     "file": "assets/appstore/ipad13-05-control.png",
+     "size": 632950,
+     "w": 2064,
+     "h": 2752,
+     "thumb": "thumbs/appstore-ipad13-05-control.png"
+    }
+   ]
+  },
+  {
+   "id": "social",
+   "label": "Social posts",
+   "items": [
+    {
+     "name": "content-01.png",
+     "file": "assets/social/content-01.png",
+     "size": 83766,
+     "w": 1080,
+     "h": 1080
+    },
+    {
+     "name": "content-02.png",
+     "file": "assets/social/content-02.png",
+     "size": 84536,
+     "w": 1080,
+     "h": 1080
+    },
+    {
+     "name": "content-03.png",
+     "file": "assets/social/content-03.png",
+     "size": 98978,
+     "w": 1080,
+     "h": 1080
+    },
+    {
+     "name": "content-04.png",
+     "file": "assets/social/content-04.png",
+     "size": 82690,
+     "w": 1080,
+     "h": 1080
+    },
+    {
+     "name": "content-05.png",
+     "file": "assets/social/content-05.png",
+     "size": 77512,
+     "w": 1080,
+     "h": 1080
+    },
+    {
+     "name": "content-06.png",
+     "file": "assets/social/content-06.png",
+     "size": 99408,
+     "w": 1080,
+     "h": 1080
+    },
+    {
+     "name": "content-07.png",
+     "file": "assets/social/content-07.png",
+     "size": 90288,
+     "w": 1080,
+     "h": 1080
+    },
+    {
+     "name": "content-08.png",
+     "file": "assets/social/content-08.png",
+     "size": 78939,
+     "w": 1080,
+     "h": 1080
+    },
+    {
+     "name": "content-09.png",
+     "file": "assets/social/content-09.png",
+     "size": 283972,
+     "w": 1080,
+     "h": 1080,
+     "thumb": "thumbs/social-content-09.png"
+    },
+    {
+     "name": "content-10.png",
+     "file": "assets/social/content-10.png",
+     "size": 86725,
+     "w": 1080,
+     "h": 1080
+    },
+    {
+     "name": "feature01-feed.png",
+     "file": "assets/social/feature01-feed.png",
+     "size": 216133,
+     "w": 1080,
+     "h": 1080,
+     "thumb": "thumbs/social-feature01-feed.png"
+    },
+    {
+     "name": "feature02-conversations.png",
+     "file": "assets/social/feature02-conversations.png",
+     "size": 219728,
+     "w": 1080,
+     "h": 1080,
+     "thumb": "thumbs/social-feature02-conversations.png"
+    },
+    {
+     "name": "feature03-profile.png",
+     "file": "assets/social/feature03-profile.png",
+     "size": 245788,
+     "w": 1080,
+     "h": 1080,
+     "thumb": "thumbs/social-feature03-profile.png"
+    },
+    {
+     "name": "feature04-control.png",
+     "file": "assets/social/feature04-control.png",
+     "size": 143255,
+     "w": 1080,
+     "h": 1080,
+     "thumb": "thumbs/social-feature04-control.png"
+    },
+    {
+     "name": "feature05-signin.png",
+     "file": "assets/social/feature05-signin.png",
+     "size": 146491,
+     "w": 1080,
+     "h": 1080,
+     "thumb": "thumbs/social-feature05-signin.png"
+    },
+    {
+     "name": "post01-question.png",
+     "file": "assets/social/post01-question.png",
+     "size": 86128,
+     "w": 1080,
+     "h": 1080
+    },
+    {
+     "name": "post02-problem.png",
+     "file": "assets/social/post02-problem.png",
+     "size": 70833,
+     "w": 1080,
+     "h": 1080
+    },
+    {
+     "name": "post03-choice.png",
+     "file": "assets/social/post03-choice.png",
+     "size": 89712,
+     "w": 1080,
+     "h": 1080
+    },
+    {
+     "name": "post04-reveal.png",
+     "file": "assets/social/post04-reveal.png",
+     "size": 234773,
+     "w": 1080,
+     "h": 1080,
+     "thumb": "thumbs/social-post04-reveal.png"
+    },
+    {
+     "name": "post05-blackbox.png",
+     "file": "assets/social/post05-blackbox.png",
+     "size": 97092,
+     "w": 1080,
+     "h": 1080
+    },
+    {
+     "name": "post06-why.png",
+     "file": "assets/social/post06-why.png",
+     "size": 83492,
+     "w": 1080,
+     "h": 1080
+    },
+    {
+     "name": "post07-your-choice.png",
+     "file": "assets/social/post07-your-choice.png",
+     "size": 77384,
+     "w": 1080,
+     "h": 1080
+    },
+    {
+     "name": "post08-perspectives.png",
+     "file": "assets/social/post08-perspectives.png",
+     "size": 104264,
+     "w": 1080,
+     "h": 1080
+    },
+    {
+     "name": "post09-conversations.png",
+     "file": "assets/social/post09-conversations.png",
+     "size": 89286,
+     "w": 1080,
+     "h": 1080
+    },
+    {
+     "name": "post10-readers.png",
+     "file": "assets/social/post10-readers.png",
+     "size": 75081,
+     "w": 1080,
+     "h": 1080
+    },
+    {
+     "name": "post11-launch-cta.png",
+     "file": "assets/social/post11-launch-cta.png",
+     "size": 83380,
+     "w": 1080,
+     "h": 1080
+    }
+   ]
+  },
+  {
+   "id": "covers",
+   "label": "Covers",
+   "items": [
+    {
+     "name": "facebook-cover-1640x624.png",
+     "file": "assets/covers/facebook-cover-1640x624.png",
+     "size": 96393,
+     "w": 1640,
+     "h": 624
+    }
+   ]
+  }
+ ]
+}
