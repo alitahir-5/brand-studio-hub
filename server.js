@@ -363,4 +363,170 @@ Output exactly:
   }
 });
 
+// ---------- Motion Studio: AI-written motion graphics (logistics playbook) ----------
+const vm = require("vm");
+const crypto = require("crypto");
+const readText = f => { try { return fs.readFileSync(path.join(__dirname, f), "utf8"); } catch { return ""; } };
+const PLAYBOOK = readText("video/playbook.md")
+  .replace(/## 4\. How the videos were rendered[\s\S]*?(?=## 5\.)/, "")   // Python toolchain does not apply here
+  .replace(/## 6\. Prompt templates[\s\S]*?(?=## 7\.)/, "")
+  .replace(/## 9\. Source files[\s\S]*$/, "");
+const KIT_API = readText("video/motion-kit-api.md");
+const EXAMPLE = readText("public/motion/example-dashboard.js");
+
+const MOTION_SYSTEM = `You are a senior motion designer and creative coder producing logistics motion-graphics videos for a marketing team.
+You write each video as JavaScript that draws every frame on an HTML canvas using the Motion Kit (global MK). The app plays it and exports a 30 fps MP4 with the synthesized sound.
+
+Follow the playbook below exactly: its constraints, design system, motion principles, recipes, sound design and tips. Where the playbook describes Python, Pillow or FFmpeg, use the Motion Kit equivalents instead. Respect "Known gotchas", especially: narrative and data must agree; identical objects across wipes; keep 9:16 key content in the middle 65%.
+
+Quality bar: the result must look like a polished, production motion-graphics piece: precise layout on a grid, generous spacing, consistent card sizes, staggered entrances, nothing overlapping or clipped, every label readable at 1080p (at least 16 px; most UI text 18 to 24 px; key numbers 48 px and up), and continuous subtle motion so no moment feels static. Plan the timeline first, then code it.
+
+Never use em dashes in on-screen text. Never draw logos, brand names, headings or titles unless the request explicitly asks for them.
+
+<playbook>
+${PLAYBOOK}
+</playbook>
+
+<motion_kit_api>
+${KIT_API}
+</motion_kit_api>
+
+<example_video>
+This is a complete, approved example (playbook 3.2) that shows the expected code style, structure and level of polish:
+${EXAMPLE}
+</example_video>
+
+Output format, always exactly:
+<plan>
+A short timeline: one line per beat with times, in plain language for the marketing team.
+</plan>
+<code>
+The complete JavaScript (top-level constants and helpers, then const video = {...}). No markdown fences, no HTML.
+</code>`;
+
+const RECIPES = {
+  custom: { name: "Custom concept", ref: "" },
+  streams: { name: "Data-streams flowchart", ref: "playbook section 3.1" },
+  dashboard: { name: "Raw data to dashboard with insights", ref: "playbook section 3.2" },
+  live: { name: "Live analytics UI", ref: "playbook section 3.3" },
+  pattern: { name: "AI/ML pattern discovery over a supplied frame", ref: "playbook section 3.4" },
+  wipe: { name: "Truck wipe transition", ref: "playbook section 3.5" },
+};
+
+function motionPrompt(o) {
+  const portrait = o.format === "9:16";
+  const [w, h] = portrait ? [1080, 1920] : [1920, 1080];
+  const r = RECIPES[o.recipe] || RECIPES.custom;
+  const lang = o.language || "English";
+  return `Create a new video.
+Recipe: ${r.name}${r.ref ? ` (${r.ref}; follow its structure, layout ratios, timeline and sound design, adapted to the settings below)` : ""}.
+Format: ${w}x${h} (${portrait ? "9:16 vertical; keep key content inside the middle 65% of the height" : "16:9"}).
+Duration: ${Number(o.duration) || 15} seconds.
+Theme: ${o.theme === "dark-light" ? "dark to light (problem to solved story, joined by a transition)" : o.theme === "dark" ? "dark" : "light"}.
+Sound: ${o.sound ? "subtle synthesized sound effects synced to the animation, per the playbook (set video.sound)" : "none (set video.sound = null)"}.
+Red: ${o.allowRed ? "allowed only for warnings and congestion" : "not allowed"}.
+On-screen language: ${lang}.${lang !== "English" ? " Change only the words (playbook section 5): layout un-mirrored, IDs, codes and numbers stay Latin with Western digits, keep strings short enough to fit, measure and shrink if needed." : ""}
+Base frame: ${o.hasFrame ? `provided as FRAME (${o.frameW}x${o.frameH}); use it as the base layer as in playbook 3.4` : "none"}.
+${o.concept ? `Concept and beats:\n${String(o.concept).slice(0, 3000)}\n` : ""}${o.data ? `Data to show (placeholders are fine where not given):\n${String(o.data).slice(0, 2000)}\n` : ""}
+Return the <plan> and the complete <code>.`;
+}
+
+function parseMotion(text) {
+  const plan = (text.match(/<plan>([\s\S]*?)<\/plan>/i)?.[1] || "").trim();
+  let code = text.match(/<code>([\s\S]*?)<\/code>/i)?.[1];
+  if (!code) code = text.match(/```(?:js|javascript)?\s*([\s\S]*?)```/i)?.[1];
+  if (!code) { const i = text.indexOf("<code>"); if (i >= 0) code = text.slice(i + 6); }
+  code = String(code || "").replace(/^\s*```(?:js|javascript)?/i, "").replace(/```\s*$/i, "").trim();
+  return { plan: noDash(plan), code };
+}
+function checkMotionCode(code) {
+  if (!/\bvideo\s*=/.test(code)) return "The code does not define `const video = {...}`.";
+  try { new vm.Script(code); return null; } catch (e) { return `JavaScript syntax error: ${e.message}`; }
+}
+
+// Claude with streaming (long outputs), falling back to the shared ask() for Gemini.
+async function callClaudeStream({ system, prompt, maxTokens }) {
+  const r = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "x-api-key": process.env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json" },
+    body: JSON.stringify({ model: CLAUDE_MODEL, max_tokens: maxTokens, stream: true,
+      system: [{ type: "text", text: system, cache_control: { type: "ephemeral" } }], messages: [{ role: "user", content: prompt }] }),
+  });
+  if (!r.ok) { const d = await r.json().catch(() => ({})); throw new Error(d?.error?.message || `Claude API error ${r.status}`); }
+  const reader = r.body.getReader(), dec = new TextDecoder(); let buf = "", out = "";
+  for (;;) {
+    const { value, done } = await reader.read(); if (done) break;
+    buf += dec.decode(value, { stream: true });
+    let i; while ((i = buf.indexOf("\n")) >= 0) {
+      const line = buf.slice(0, i).trim(); buf = buf.slice(i + 1);
+      if (!line.startsWith("data:")) continue;
+      try { const ev = JSON.parse(line.slice(5)); if (ev.type === "content_block_delta" && ev.delta?.text) out += ev.delta.text; if (ev.type === "error") throw new Error(ev.error?.message || "stream error"); } catch (e) { if (e.message && !/JSON/.test(e.message)) throw e; }
+    }
+  }
+  return out;
+}
+async function askLong({ system, prompt, maxTokens, engine }) {
+  const first = engine === "claude" || engine === "gemini" ? engine : DEFAULT_AI;
+  const order = [first, first === "claude" ? "gemini" : "claude"].filter(e => HAS[e]);
+  if (!order.length) throw new Error("No AI key is set.");
+  let lastErr;
+  for (const e of order) {
+    try { const text = e === "claude" ? await callClaudeStream({ system, prompt, maxTokens }) : await callGemini({ system, prompt, maxTokens }); return { text, engine: e }; }
+    catch (err) { lastErr = err; console.error(`${e} failed (motion):`, err.message); }
+  }
+  throw lastErr;
+}
+
+const jobs = new Map();
+setInterval(() => { const cut = Date.now() - 2 * 3600e3; for (const [k, j] of jobs) if (j.at < cut) jobs.delete(k); }, 600e3).unref();
+function startJob(fn) {
+  const id = crypto.randomUUID(); const job = { status: "running", at: Date.now(), stage: "Planning the timeline" }; jobs.set(id, job);
+  fn(job).then(r => Object.assign(job, { status: "done" }, r)).catch(e => { console.error("motion job:", e.message); Object.assign(job, { status: "error", error: e.userMessage || "The video couldn't be generated this time. Try again, or simplify the concept." }); });
+  return id;
+}
+async function generateMotion(job, prompt, engine) {
+  job.stage = "Writing the animation";
+  let out = await askLong({ system: MOTION_SYSTEM, prompt, maxTokens: 30000, engine });
+  let { plan, code } = parseMotion(out.text);
+  let problem = checkMotionCode(code);
+  if (problem) { // one automatic repair round
+    job.stage = "Fixing a code problem";
+    const fix = await askLong({ system: MOTION_SYSTEM, engine, maxTokens: 30000, prompt: `This video code has a problem: ${problem}\nReturn the corrected complete code (and the same plan).\n<plan>\n${plan}\n</plan>\n<code>\n${code}\n</code>` });
+    const p2 = parseMotion(fix.text); if (p2.code) { code = p2.code; plan = p2.plan || plan; out = fix; }
+    problem = checkMotionCode(code);
+    if (problem) { const e = new Error(problem); e.userMessage = "The generated animation had a code error. Try again."; throw e; }
+  }
+  return { code: noDash(code), plan, engine: LABEL[out.engine] };
+}
+
+app.post("/api/motion", (req, res) => {
+  if (limited(req.ip)) return res.status(429).json({ error: "Too many requests. Wait a few minutes and try again." });
+  const b = req.body || {};
+  if (!b.concept && (!b.recipe || b.recipe === "custom")) return res.status(400).json({ error: "Describe the concept or pick a recipe." });
+  const id = startJob(job => generateMotion(job, motionPrompt(b), b.engine));
+  res.json({ id });
+});
+app.post("/api/motion/revise", (req, res) => {
+  if (limited(req.ip)) return res.status(429).json({ error: "Too many requests. Wait a few minutes and try again." });
+  const { code = "", plan = "", instruction = "", error = "", engine = "auto" } = req.body || {};
+  if (!code) return res.status(400).json({ error: "Nothing to change yet." });
+  if (!instruction && !error) return res.status(400).json({ error: "Say what to change." });
+  const prompt = `${error ? `The current video throws this error when it runs: ${String(error).slice(0, 800)}\nFix it.` : `Apply this change to the current video: ${String(instruction).slice(0, 2000)}`}
+Keep everything else the same unless the change requires otherwise. Return the updated <plan> and the complete updated <code>.
+<plan>
+${String(plan).slice(0, 4000)}
+</plan>
+<code>
+${String(code).slice(0, 120000)}
+</code>`;
+  const id = startJob(job => generateMotion(job, prompt, engine));
+  res.json({ id });
+});
+app.get("/api/motion/:id", (req, res) => {
+  const j = jobs.get(req.params.id);
+  if (!j) return res.status(404).json({ status: "error", error: "This job has expired. Start again." });
+  res.json({ status: j.status, stage: j.stage, code: j.code, plan: j.plan, engine: j.engine, error: j.error, elapsed: Math.round((Date.now() - j.at) / 1000) });
+});
+app.use("/vendor-mux", express.static(path.join(__dirname, "node_modules/mp4-muxer/build")));
+
 app.listen(PORT, () => console.log(`Brand Studio Hub on :${PORT} (Claude: ${HAS.claude ? CLAUDE_MODEL : "off"}, Gemini: ${HAS.gemini ? GEMINI_MODEL : "off"}, default: ${DEFAULT_AI})`));

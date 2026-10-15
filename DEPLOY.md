@@ -44,7 +44,7 @@ Check that the repository's top level shows `server.js`, `package.json`, `render
 3. In the app, top right, the **AI writer** menu shows Auto, Claude and Gemini.
 4. Go to **LocomotePro > Write**, pick Claude, write a short brief and press **Write**. The status line should say "written by Claude". Switch to Gemini and repeat.
 5. In **Post Designer**, pick a brand, keep the sample brief, press **Design it**, wait about a minute, then **Download PNG**.
-6. In **Video Studio > Write with AI**, draft scenes, then **Export video** and check the file downloads.
+6. In **Video Studio**, press **Play** on the example, then **Export MP4** and check the file plays with sound. Then pick a recipe and press **Generate video** (2 to 5 minutes).
 
 ## 5. Share with the team
 

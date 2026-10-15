@@ -176,6 +176,18 @@ a.btn{text-decoration:none;color:inherit} a.btn.primary{color:var(--accent-fg)}
 .d-recent button b{display:block;font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .d-recent button span{color:var(--muted)}
 .d-busy{position:absolute;inset:0;display:grid;place-items:center;background:color-mix(in srgb,var(--panel) 70%,transparent);font-weight:600}
+.motion{display:grid;grid-template-columns:minmax(290px,390px) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:900px){.motion{grid-template-columns:1fr}}
+.m-controls{padding:16px;display:flex;flex-direction:column;gap:12px}
+.m-main{display:flex;flex-direction:column;gap:16px;min-width:0}
+.m-stagecard{padding:14px;display:flex;flex-direction:column;gap:12px}
+.m-top{display:flex;align-items:center;gap:10px}
+.m-top b{font-size:15px}
+.m-plan{white-space:pre-wrap;font-size:13.5px;line-height:1.55;color:var(--fg)}
+.checks{gap:16px}
+.chk{display:flex;align-items:center;gap:7px;font-size:13px;flex:0 0 auto!important;min-width:0!important}
+#mSeek{flex:1;min-width:120px;accent-color:var(--accent)}
+.m-stage-frame iframe{border:0;transform-origin:0 0;position:absolute;left:0;top:0}
 .ds{max-width:760px;margin:24px auto;padding:28px;display:flex;flex-direction:column;gap:14px}
 .ds h2{margin:0;font-size:24px;letter-spacing:-.02em;text-wrap:balance}
 .ds p{margin:0;color:var(--muted);max-width:62ch}
@@ -187,12 +199,13 @@ a.btn{text-decoration:none;color:inherit} a.btn.primary{color:var(--accent-fg)}
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+<script src="/motion/motion-kit.js"></script>
 </head>
 <body>
 <header class="bar">
   <div class="brand">Brand Studio Hub<small>Design systems and video for the team</small></div>
   <nav class="tabs" role="tablist">
-    <button class="tab" role="tab" id="t-video" aria-selected="true" data-view="video">Video Studio</button>
+    <button class="tab" role="tab" id="t-motion" aria-selected="true" data-view="motion">Video Studio</button>
     <button class="tab" role="tab" id="t-design" aria-selected="false" data-view="design">Post Designer</button>
     <button class="tab" role="tab" id="t-loco" aria-selected="false" data-view="loco">LocomotePro</button>
     <button class="tab" role="tab" id="t-surf" aria-selected="false" data-view="surf">Surfaced Social</button>
@@ -203,7 +216,65 @@ a.btn{text-decoration:none;color:inherit} a.btn.primary{color:var(--accent-fg)}
 </header>
 
 <main>
-<section id="v-video" class="studio">
+<section id="v-motion" class="motion">
+  <div class="card m-controls">
+    <label class="f">Recipe<select id="mRecipe">
+      <option value="dashboard">Raw data to dashboard with insights</option>
+      <option value="streams">Data-streams flowchart</option>
+      <option value="live">Live analytics UI</option>
+      <option value="pattern">AI pattern discovery over your frame</option>
+      <option value="wipe">Truck wipe transition</option>
+      <option value="custom">Custom concept</option></select></label>
+    <div class="row">
+      <div class="group" style="flex:1"><span class="f-label">Format</span>
+        <div class="seg3" id="mFormat"><button data-v="16:9" aria-pressed="true">16:9</button><button data-v="9:16" aria-pressed="false">9:16</button></div></div>
+      <label class="f" style="flex:0 0 96px">Seconds<input type="number" id="mDur" min="6" max="30" step="1" value="19"></label>
+    </div>
+    <div class="row">
+      <label class="f">Theme<select id="mTheme"><option value="light">Light</option><option value="dark">Dark</option><option value="dark-light">Dark to light</option></select></label>
+      <label class="f">Language<select id="mLang"><option>English</option><option>Arabic</option><option>Bangla</option></select></label>
+    </div>
+    <div class="row checks">
+      <label class="chk"><input type="checkbox" id="mSound" checked> Sound effects</label>
+      <label class="chk"><input type="checkbox" id="mRed"> Allow red warnings</label>
+    </div>
+    <label class="f">Concept and beats (with rough timings)<textarea id="mConcept" rows="6"></textarea></label>
+    <label class="f">Data to show (optional)<textarea id="mData" rows="3" placeholder="e.g. customs dwell 21.5 h, on-time 91%, Route B +18% cost. Placeholders are used where you leave gaps."></textarea></label>
+    <div class="group" id="mFrameBox"><span class="f-label">Base frame (optional, for the pattern-discovery recipe)</span>
+      <div class="row" style="align-items:center"><input type="file" id="mFrame" accept="image/*"><button class="btn sm" id="mFrameClear" hidden>Remove</button></div></div>
+    <div class="row-btns"><button class="btn primary" id="mGo">Generate video</button><button class="btn" id="mStop" hidden>Stop waiting</button></div>
+    <div class="note" id="mStatus"></div>
+    <p class="note warn ai-off" hidden>The AI isn't set up on this server yet. Add an API key in the hosting settings (see README).</p>
+    <p class="note">No logos, brand names or headings, per the playbook. Figures are placeholders unless you give real ones. Need a quick branded text video instead? <a href="#" id="mSimple">Open the simple text video maker</a>.</p>
+  </div>
+
+  <div class="m-main">
+    <div class="card m-stagecard">
+      <div class="m-top"><b id="mTitle">Example: raw data to insights</b><span class="example" id="mExample">EXAMPLE</span></div>
+      <div class="d-stage" id="mStage"></div>
+      <div class="transport">
+        <button class="btn" id="mPlay">▶ Play</button>
+        <input type="range" id="mSeek" min="0" max="1000" value="0" aria-label="Scrub">
+        <span class="tc" id="mTc">0:00.0 / 0:00.0</span>
+      </div>
+      <div class="export">
+        <button class="btn primary" id="mExport">Export MP4</button>
+        <div class="meter" id="mMeter" hidden><i id="mMeterFill"></i></div>
+        <span class="note" id="mExportNote">Renders frame by frame at 30 fps with sound. Use Chrome or Edge on a computer.</span>
+      </div>
+    </div>
+    <div class="card bp-sec">
+      <h3>Change something</h3>
+      <div class="d-revise"><input type="text" id="mChange" placeholder="e.g. slow the scan beam to 4 seconds, make the insight cards appear 1 s earlier, switch to dark"><button class="btn" id="mApply">Apply</button></div>
+      <div class="row-btns"><button class="btn sm" id="mFix" hidden>Fix this error</button></div>
+      <div class="note" id="mErr"></div>
+    </div>
+    <div class="card bp-sec"><h3>Timeline</h3><div class="m-plan" id="mPlan"></div></div>
+    <div class="card bp-sec" id="mRecentCard" hidden><h3>Recent videos on this device</h3><div class="d-recent" id="mRecent"></div></div>
+  </div>
+</section>
+
+<section id="v-video" class="studio" hidden>
   <div class="card stage">
     <div class="screen"><canvas id="cv" width="1280" height="720" aria-label="Video preview"></canvas></div>
     <div class="transport">
@@ -767,8 +838,8 @@ $("#musicClear").onclick=()=>{ stop(); musicBuf=null; $("#musicIn").value=""; $(
 /* ---------- panel + app tabs ---------- */
 document.querySelectorAll(".ptab").forEach(b=>b.onclick=()=>{ document.querySelectorAll(".ptab").forEach(x=>x.setAttribute("aria-selected",String(x===b)));
   ["scenes","look","ai"].forEach(p=>$("#p-"+p).hidden = p!==b.dataset.p); });
-function showView(v){ document.querySelectorAll(".tab").forEach(x=>x.setAttribute("aria-selected",String(x.dataset.view===v)));
-  ["video","design","loco","surf"].forEach(k=>$("#v-"+k).hidden = k!==v); if(v!=="video") stop(); try{ localStorage.setItem("bsh-tab",v); }catch(e){} }
+function showView(v){ document.querySelectorAll(".tab").forEach(x=>x.setAttribute("aria-selected",String(x.dataset.view===(v==="video"?"motion":v))));
+  ["motion","video","design","loco","surf"].forEach(k=>$("#v-"+k).hidden = k!==v); if(v!=="video") stop(); if(v!=="motion") window.mPause&&window.mPause(); try{ localStorage.setItem("bsh-tab",v); }catch(e){} }
 document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>showView(b.dataset.view));
 
 /* ---------- export ---------- */
@@ -968,6 +1039,124 @@ function dRenderRecent(){ const list=dRecentList(); $("#dRecentCard").hidden=!li
 let dBrandInit="locomotepro"; try{ dBrandInit=localStorage.getItem("bsh-dbrand")||"locomotepro"; }catch(e){}
 dSetBrand(dBrandInit); dRenderRecent();
 
+
+/* ---------- Motion Studio (logistics playbook) ---------- */
+const M={code:"",plan:"",title:"",settings:null,frame:null,frameW:0,frameH:0,info:null,t:0,playing:false,audioBuf:null,audioKey:"",ac:null,src:null,job:null,lastError:"",lib:null};
+const RECIPE_DEFAULTS={
+  dashboard:{dur:19,theme:"light",sound:true,red:false,format:"16:9",concept:"0 to 3 s: columns of raw shipment records scroll, a few lines flagged.\n3 to 5.6 s: a blue scan beam sweeps left to right, turning raw data into a dashboard (KPI cards count up, transit line chart draws, dwell bars grow, delay-causes donut sweeps).\n8.4, 11 and 13.6 s: three insight cards slide in, each linked by a numbered badge to the chart element it explains.\n16 s: KPI cards switch to projected values with actions."},
+  streams:{dur:15,theme:"dark",sound:true,red:false,format:"16:9",concept:"Six logistics stages (Order, Warehouse, Loading, Transit, Customs as a decision diamond, Delivery) appear one by one and connect. Each stage emits streams of data packets down a branch into an intake line, where a two-column raw-record log scrolls. A white token pulse travels the main flow five times; each node it reaches flashes and bursts packets."},
+  live:{dur:20,theme:"light",sound:false,red:false,format:"16:9",concept:"A real-time analytics UI with six panels: shipments (rows entering with changing status chips), routes (network with moving vehicles and route-optimization cycles at 4, 9.5 and 14.8 s), costs (ticking value and scrolling area chart), vendors (live re-ranking), performance (ring gauges and a scrolling histogram) and live AI insights with a thinking indicator. Status strip on top with a live dot and records-analyzed counter."},
+  pattern:{dur:24,theme:"light",sound:false,red:false,format:"16:9",concept:"Use the uploaded dashboard frame as the base. Ingest: a scan beam reveals it. Learn: a neural-style graph links the panels. Detect: route clusters and a recurring delay pattern, then a cost trend line with an anomaly and a 24 h forecast. Predict: vendor delay-risk pills and a demand forecast. Optimize: dashboard dims and three opportunity cards with confidence meters appear. Camera zooms into each panel in turn (max 1.42x)."},
+  wipe:{dur:12,theme:"dark-light",sound:false,red:true,format:"16:9",concept:"A container truck (side view, facing right, blue ribbed container, no text) drives the whole time. 0 to 5.2 s, dark: stop-and-go congestion, queued vehicles with blinking brake lights, red detection boxes, flashing red warnings and red readouts. 5.2 to 7 s: a slanted digital stair-step wipe sweeps left to right with flying data pixels. 7 to 12 s, light: the truck at highway speed, clear flow, blue steady beacons, readouts all clear."},
+  custom:{dur:15,theme:"light",sound:true,red:false,format:"16:9",concept:""},
+};
+let mFormat="16:9";
+function mApplyRecipe(r){ const d=RECIPE_DEFAULTS[r]; $("#mDur").value=d.dur; $("#mTheme").value=d.theme; $("#mSound").checked=d.sound; $("#mRed").checked=d.red; mSetFormat(d.format); $("#mConcept").value=d.concept; }
+function mSetFormat(f){ mFormat=f; document.querySelectorAll("#mFormat button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.v===f))); }
+document.querySelectorAll("#mFormat button").forEach(b=>b.onclick=()=>mSetFormat(b.dataset.v));
+$("#mRecipe").onchange=()=>mApplyRecipe($("#mRecipe").value);
+$("#mSimple").onclick=e=>{ e.preventDefault(); showView("video"); };
+$("#mFrame").onchange=e=>{ const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>{ const im=new Image(); im.onload=()=>{ M.frame=r.result; M.frameW=im.width; M.frameH=im.height; $("#mFrameClear").hidden=false; }; im.src=r.result; }; r.readAsDataURL(f); };
+$("#mFrameClear").onclick=()=>{ M.frame=null; $("#mFrame").value=""; $("#mFrameClear").hidden=true; };
+
+async function mLib(){ if(M.lib) return M.lib; const get=u=>fetch(u).then(r=>{ if(!r.ok) throw new Error(u); return r.text(); });
+  const [kit,mux,runner,example]=await Promise.all([get("/motion/motion-kit.js"),get("/vendor-mux/mp4-muxer.js"),get("/motion/runner.js"),get("/motion/example-dashboard.js")]);
+  M.lib={kit,mux,runner,example}; return M.lib; }
+const esc=x=>String(x).replace(/<\/script/gi,"<\\/script");
+function mDoc(code){
+  const L=M.lib;
+  const fonts="https://fonts.googleapis.com/css2?family=Arimo:wght@400;700&family=Cousine:wght@400;700&family=Noto+Sans+Arabic:wght@400;700&family=Noto+Sans+Bengali:wght@400;700&display=swap";
+  return `<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="${fonts}"><style>html,body{margin:0;background:transparent;overflow:hidden}canvas{display:block}</style></head><body><canvas id="c"></canvas>`+
+  `<script>window.onerror=function(m,s,l){parent.postMessage({type:"error",message:String(m)+(l?" (line "+l+")":"")},"*")};<\/script>`+
+  `<script>${esc(L.kit)}<\/script><script>${esc(L.mux)}<\/script>`+
+  (M.frame?`<img id="__f" alt="" style="display:none" src="${M.frame}"><script>window.FRAME=document.getElementById("__f");<\/script>`:`<script>window.FRAME=null;<\/script>`)+
+  `<script>${esc(code)}\n;window.video=(typeof video!=="undefined")?video:undefined;<\/script><script>${esc(L.runner)}<\/script></body></html>`;
+}
+let mRO=null;
+function mLoad(code,plan,title,isExample){
+  mPause(); M.code=code; M.plan=plan||""; M.info=null; M.lastError=""; M.audioBuf=null; M.audioKey="";
+  $("#mTitle").textContent=title||"Untitled video"; $("#mExample").hidden=!isExample; $("#mPlan").textContent=M.plan||"No timeline notes."; $("#mErr").textContent=""; $("#mFix").hidden=true;
+  $("#mExport").disabled=true; $("#mPlay").disabled=true;
+  const stage=$("#mStage"); stage.textContent=""; const frame=document.createElement("div"); frame.className="d-frame m-stage-frame";
+  const ifr=document.createElement("iframe"); ifr.setAttribute("sandbox","allow-scripts"); ifr.title="Video preview";
+  frame.append(ifr); stage.append(frame); M.iframe=ifr; M.frameEl=frame; ifr.srcdoc=mDoc(code);
+  mFit(isExample?1920:1920, 1080);
+}
+function mFit(w,h){ const stage=$("#mStage"), frame=M.frameEl, ifr=M.iframe; if(!frame) return;
+  ifr.width=w; ifr.height=h; ifr.style.width=w+"px"; ifr.style.height=h+"px";
+  const fit=()=>{ const W=stage.clientWidth-24, H=Math.min(window.innerHeight*0.62,760), k=Math.min(W/w,H/h,1);
+    frame.style.width=Math.round(w*k)+"px"; frame.style.height=Math.round(h*k)+"px"; ifr.style.transform=`scale(${k})`; };
+  fit(); if(mRO) mRO.disconnect(); mRO=new ResizeObserver(fit); mRO.observe(stage); }
+const mPost=(m,tr)=>M.iframe&&M.iframe.contentWindow&&M.iframe.contentWindow.postMessage(m,"*",tr||[]);
+function mTime(t){ const D=M.info?M.info.duration:0; M.t=t; $("#mTc").textContent=`${fmtT(t)} / ${fmtT(D)}`; if(D) $("#mSeek").value=Math.round(t/D*1000); }
+window.addEventListener("message",e=>{
+  if(!M.iframe||e.source!==M.iframe.contentWindow) return; const m=e.data||{};
+  if(m.type==="ready"){ M.info=m; M.fresh=true; mFit(m.width,m.height); $("#mPlay").disabled=false; $("#mExport").disabled=false; mTime(0); mPost({type:"seek",t:Math.min(m.duration*0.45,8)}); }
+  else if(m.type==="time"){ mTime(m.t); if(!m.playing&&M.playing){ M.playing=false; $("#mPlay").textContent="▶ Play"; mStopAudio(); } }
+  else if(m.type==="error"){ M.lastError=m.message+(m.at?` at ${m.at}s`:""); $("#mErr").className="note bad"; $("#mErr").textContent=`The animation hit an error: ${M.lastError}`; $("#mFix").hidden=false; }
+  else if(m.type==="progress"){ $("#mMeterFill").style.width=Math.round(m.p*100)+"%"; }
+  else if(m.type==="exported"){ const url=URL.createObjectURL(m.blob); const a=document.createElement("a"); a.href=url;
+    a.download=`${(M.title||"logistics-video").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||"video"}-${M.info.width}x${M.info.height}.${m.ext}`;
+    document.body.append(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),120000);
+    $("#mExport").disabled=false; $("#mExport").textContent="Export MP4"; $("#mExportNote").className=m.note?"note warn":"note good";
+    $("#mExportNote").textContent=m.note||`Downloaded (${(m.blob.size/1048576).toFixed(1)} MB).`; }
+  else if(m.type==="exportError"){ $("#mExport").disabled=false; $("#mExport").textContent="Export MP4"; $("#mExportNote").className="note bad"; $("#mExportNote").textContent=m.message; }
+});
+async function mAudio(){ if(!M.info||!M.info.sound) return null; const key=JSON.stringify(M.info.sound)+M.info.duration; if(M.audioKey===key&&M.audioBuf) return M.audioBuf;
+  try{ M.audioBuf=await MK.renderAudio(M.info.sound,M.info.duration); M.audioKey=key; }catch(e){ M.audioBuf=null; } return M.audioBuf; }
+function mStopAudio(){ try{ M.src&&M.src.stop(); }catch(e){} M.src=null; }
+async function mPlay(){ if(!M.info) return; let from=M.fresh?0:M.t; M.fresh=false; if(from>=M.info.duration-0.05) from=0; M.t=from;
+  M.playing=true; $("#mPlay").textContent="❚❚ Pause"; mPost({type:"play",t:from});
+  const buf=await mAudio(); if(buf&&M.playing){ if(!M.ac) M.ac=new (window.AudioContext||window.webkitAudioContext)(); await M.ac.resume(); mStopAudio();
+    const s=M.ac.createBufferSource(); s.buffer=buf; s.connect(M.ac.destination); s.start(0,Math.max(0,M.t)); M.src=s; } }
+function mPause(){ if(M.playing){ M.playing=false; mPost({type:"pause"}); } mStopAudio(); $("#mPlay").textContent="▶ Play"; }
+window.mPause=mPause;
+$("#mPlay").onclick=()=>M.playing?mPause():mPlay();
+$("#mSeek").oninput=()=>{ if(!M.info) return; M.fresh=false; const t=$("#mSeek").value/1000*M.info.duration; const was=M.playing; mPause(); mPost({type:"seek",t}); M.t=t; if(was) setTimeout(mPlay,30); };
+$("#mExport").onclick=async()=>{ if(!M.info) return; mPause(); $("#mExport").disabled=true; $("#mExport").textContent="Exporting…"; $("#mMeter").hidden=false; $("#mMeterFill").style.width="0%";
+  $("#mExportNote").className="note"; $("#mExportNote").textContent="Encoding frames. Keep this tab open.";
+  let audio=null; const buf=await mAudio(); if(buf){ audio={sampleRate:buf.sampleRate,channels:[buf.getChannelData(0).slice(),buf.getChannelData(1).slice()]}; }
+  mPost({type:"export",audio},audio?audio.channels.map(c=>c.buffer):[]); };
+
+// generation jobs
+let mPoll=null;
+function mBusy(on){ $("#mGo").disabled=on; $("#mApply").disabled=on; $("#mFix").disabled=on; $("#mStop").hidden=!on; if(!on){ clearInterval(mPoll); mPoll=null; } }
+async function mRunJob(path,body,label){
+  mBusy(true); const st=$("#mStatus"); st.className="note"; st.textContent=`${label}… this usually takes 2 to 5 minutes.`;
+  try{ const r=await api(path,body); M.job=r.id; }
+  catch(e){ mBusy(false); st.className="note bad"; st.textContent=e.message; return; }
+  mPoll=setInterval(async()=>{
+    try{ const j=await fetch(`/api/motion/${M.job}`).then(r=>r.json());
+      if(j.status==="running"){ st.textContent=`${j.stage||label}… ${Math.floor(j.elapsed/60)}:${String(j.elapsed%60).padStart(2,"0")} elapsed${j.elapsed>420?". Taking longer than usual; complex videos can need up to 10 minutes.":""}`; return; }
+      mBusy(false);
+      if(j.status==="done"){ const title=body.title||(RECIPE_DEFAULTS[body.recipe]?$("#mRecipe").selectedOptions[0].textContent:M.title)||"Video";
+        M.title=title; mLoad(j.code,j.plan,title,false); mSaveRecent(); st.className="note good"; st.textContent=`Ready${j.engine?`, written by ${j.engine}`:""}. Press Play, then Export MP4.`; }
+      else { st.className="note bad"; st.textContent=j.error||"The video couldn't be generated."; }
+    }catch(e){ /* keep polling through brief network hiccups */ }
+  },3000);
+}
+$("#mStop").onclick=()=>{ mBusy(false); $("#mStatus").className="note"; $("#mStatus").textContent="Stopped waiting. The server may still finish in the background."; };
+$("#mGo").onclick=()=>{ const recipe=$("#mRecipe").value; const concept=$("#mConcept").value.trim();
+  if(recipe==="custom"&&!concept){ $("#mStatus").className="note bad"; $("#mStatus").textContent="Describe the concept and beats first."; return; }
+  M.title=$("#mRecipe").selectedOptions[0].textContent;
+  mRunJob("/api/motion",{recipe,format:mFormat,duration:+$("#mDur").value,theme:$("#mTheme").value,sound:$("#mSound").checked,allowRed:$("#mRed").checked,
+    language:$("#mLang").value,concept,data:$("#mData").value.trim(),hasFrame:!!M.frame,frameW:M.frameW,frameH:M.frameH,title:M.title},"Generating the video"); };
+$("#mApply").onclick=()=>{ const ins=$("#mChange").value.trim(); if(!ins||!M.code) return; $("#mChange").value="";
+  mRunJob("/api/motion/revise",{code:M.code,plan:M.plan,instruction:ins,title:M.title},"Applying your change"); };
+$("#mChange").addEventListener("keydown",e=>{ if(e.key==="Enter") $("#mApply").click(); });
+$("#mFix").onclick=()=>{ if(!M.code||!M.lastError) return; mRunJob("/api/motion/revise",{code:M.code,plan:M.plan,error:M.lastError,title:M.title},"Fixing the error"); };
+
+function mRecentList(){ try{ return JSON.parse(localStorage.getItem("bsh-motion")||"[]"); }catch(e){ return []; } }
+function mSaveRecent(){ const list=mRecentList(); list.unshift({title:M.title,code:M.code,plan:M.plan,at:Date.now()});
+  for(let n=6;n>0;n--){ try{ localStorage.setItem("bsh-motion",JSON.stringify(list.slice(0,n))); break; }catch(e){} } mRenderRecent(); }
+function mRenderRecent(){ const list=mRecentList(); $("#mRecentCard").hidden=!list.length; const box=$("#mRecent"); box.textContent="";
+  list.forEach(v=>{ const b=document.createElement("button"); const t=document.createElement("b"); t.textContent=v.title; const m=document.createElement("span");
+    m.textContent=new Date(v.at).toLocaleString([], {dateStyle:"medium",timeStyle:"short"}); b.append(t,m); b.onclick=()=>{ M.title=v.title; mLoad(v.code,v.plan,v.title,false); }; box.append(b); }); }
+
+mApplyRecipe("dashboard"); mRenderRecent();
+mLib().then(L=>{ M.title="Raw data to insights"; mLoad(L.example,"0 to 3 s: raw shipment records scroll, a few lines flagged.\n3.0 to 5.6 s: a blue scan beam sweeps left to right; behind it the dashboard assembles (KPIs count up, transit line draws, dwell bars grow, donut sweeps).\n8.4 / 11.0 / 13.6 s: three insight cards slide in, each linked by a numbered badge to its chart element.\n16 s: KPI cards switch to projected values with actions.\nSound: data ticks, beam whoosh and rising sweep, pops, count-up ticks, a chime per insight, a rising arpeggio at the end.","Example: raw data to insights",true); })
+  .catch(()=>{ $("#mStage").textContent="Couldn't load the motion engine. Refresh the page."; });
+
 /* ---------- boot ---------- */
 async function loadFonts(){ try{ await Promise.all([`700 40px "${state.font}"`,`400 40px "${state.font}"`,`500 40px "${state.font}"`,`800 40px "${state.font}"`,`500 40px "Inter"`,`600 40px "Inter"`,`700 40px "Space Mono"`,`700 40px "Hind Siliguri"`,`700 40px "Noto Sans Arabic"`,`700 40px "Noto Sans Bengali"`].map(f=>document.fonts.load(f))); }catch(e){} }
 $("#play").onclick=()=>playing?stop():play();
@@ -980,7 +1169,7 @@ document.querySelectorAll("#fmt button").forEach(x=>x.setAttribute("aria-pressed
 $("#exampleTag").hidden=!state.isExample;
 applyFormat(); buildThemes(); buildList(); buildTimeline(); paint();
 loadFonts().then(paint); document.fonts.ready.then(paint);
-try{ const v=localStorage.getItem("bsh-tab"); if(v) showView(v); }catch(e){}
+try{ let v=localStorage.getItem("bsh-tab"); if(v==="video") v="motion"; if(v) showView(v); }catch(e){}
 
 const engSel=$("#engine");
 try{ const v=localStorage.getItem("bsh-engine"); if(v) engSel.value=v; }catch(e){}

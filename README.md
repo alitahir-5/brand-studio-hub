@@ -2,7 +2,7 @@
 
 One web app for the team with four tools:
 
-- **Video Studio**: build short animated videos from scenes, in a brand look (LocomotePro, LocomotePro Light, Surfaced, Surfaced Ink) or a general look. Add a logo and music, draft scenes with AI, and download the finished video (MP4 in Chrome and Edge, WebM elsewhere).
+- **Video Studio**: logistics motion-graphics videos made to the team's playbook (`video/playbook.md`). Pick a recipe (raw data to dashboard, data-streams flowchart, live analytics UI, AI pattern discovery over your own frame, truck wipe transition) or describe a custom concept, set format, length, theme, sound and language (English, Arabic, Bangla), and the AI writes the animation using the Motion Kit, which implements the playbook's design system and synthesized sound. Preview, ask for changes in plain words, and export a frame-accurate 30 fps MP4 with sound (H.264 and AAC in Chrome and Edge). A generation takes 2 to 5 minutes and costs roughly 10 to 30 US cents on Claude Sonnet. A simple branded text-video maker is still available from a link in the studio.
 - **Post Designer**: describe a post and the AI designs it in your brand, the way Claude Design does: real layouts built from the brand colours, fonts, logos and screenshots, at exact social sizes (square, portrait, story, LinkedIn, banner, Facebook cover). Get up to 3 versions, ask for changes in plain words, add your own photo, and download a PNG with a matching caption. Designs cost more than text (roughly 5 to 10 US cents each on Claude Sonnet).
 - **LocomotePro**: colours, type, rules, an AI brand writer (English and Bangla), logos and graphics to download, the full brand book and design guide.
 - **Surfaced Social**: the same for Surfaced, including app screenshots, App Store images, social posts and the Facebook cover.
@@ -29,6 +29,10 @@ You can set up Claude, Gemini or both. With both, the **AI writer** menu in the 
 
 Claude requests cache the brand guide, so repeated requests for the same brand cost less.
 
+## Updating the video playbook
+
+The Video Studio follows `video/playbook.md`. Edit it (new recipes, palette, timing rules, tips) and commit; the next generation uses it. The drawing helpers live in `public/motion/motion-kit.js` and are documented for the AI in `video/motion-kit-api.md`. `public/motion/example-dashboard.js` is the approved reference video the AI learns from; replacing it with a better approved video raises the quality bar.
+
 ## Updating brand content
 
 Everything brand-specific lives in `brands/<brand>/`:
@@ -52,6 +56,7 @@ Open http://localhost:3000.
 
 ## Notes
 
-- Video export records in real time, so a 30-second video takes about 30 seconds. Keep the tab in front while it records.
+- Video Studio exports encode frame by frame, usually faster than real time. Keep the tab open until the download starts.
+- The simple text-video maker records in real time, so a 30-second video takes about 30 seconds.
 - Scenes are saved in each person's browser. Images and music are not kept between visits.
 - The interactive component library (buttons, cards, gauges) lives in the Claude design system artifacts; this app carries the brand book, tokens and assets.
