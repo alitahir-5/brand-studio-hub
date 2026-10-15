@@ -8,7 +8,7 @@ const fs = require("fs");
 
 const app = express();
 app.set("trust proxy", 1);
-app.use(express.json({ limit: "200kb" }));
+app.use(express.json({ limit: "1mb" }));
 
 const PORT = process.env.PORT || 3000;
 // Both providers can be set up at once. DEFAULT_AI picks the first choice ("claude" or "gemini");
@@ -36,6 +36,7 @@ if (TEAM_PASSWORD) {
 
 app.use(express.static(path.join(__dirname, "public")));
 app.use("/brands", express.static(path.join(__dirname, "brands")));
+app.use("/vendor", express.static(path.join(__dirname, "node_modules/html-to-image/dist")));
 
 // ---------- brand guides, loaded once ----------
 const BRANDS = {
@@ -198,6 +199,167 @@ ${String(brief).slice(0, 4000)}`;
   } catch (e) {
     console.error("write:", e.message);
     res.status(502).json({ error: "The writer couldn't finish this time. Try again in a moment." });
+  }
+});
+
+
+// ---------- Post Designer: AI-designed graphics ----------
+const SIZES = {
+  square: [1080, 1080, "Instagram / Facebook square post"],
+  portrait: [1080, 1350, "Instagram portrait post"],
+  story: [1080, 1920, "Story or Reel cover"],
+  linkedin: [1200, 627, "LinkedIn or link-share image"],
+  banner: [1500, 500, "LinkedIn or X banner"],
+  fbcover: [1640, 624, "Facebook cover"],
+};
+
+const BRAND_STYLE = {
+  locomotepro: {
+    fonts: "https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Hind+Siliguri:wght@400;500;600;700&display=swap",
+    css: `:root{--ink:#05091A;--surface:#0B1330;--surface-2:#111B3D;--surface-deep:#070D24;--line:#1C2A4D;--text:#EEF3FB;--muted:#8A99B8;--cyan:#2DD4E0;--blue:#3B6FF5;--green:#2BD17E;--amber:#F6A93B;--red:#F25B5B;--cta-text:#031024;--grad:linear-gradient(100deg,#3B6FF5 0%,#2DD4E0 100%);--grad-btn:linear-gradient(100deg,#4C86FF 0%,#34DDEA 100%);--font-display:'Poppins','Hind Siliguri',sans-serif;--font-body:'Inter','Hind Siliguri',sans-serif;--font-mono:'Space Mono',monospace;--font-bangla:'Hind Siliguri','Poppins',sans-serif}`,
+    notes: "Variables available: --ink --surface --surface-2 --surface-deep --line --text --muted --cyan --blue --green --amber --red --cta-text --grad --grad-btn --font-display --font-body --font-mono --font-bangla. Dark navy is the default look. A light version may use #EEF3FB page, #FFFFFF cards, #05091A text, #0A7A88 cyan and #2F5FD6 blue.",
+  },
+  surfaced: {
+    fonts: "https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap",
+    css: `:root{--blue-600:#0088DB;--blue-700:#006FB3;--cyan-500:#00ADE2;--cyan-400:#33C1EA;--cyan-100:#DFF4FB;--cyan-50:#F0FAFD;--ink-900:#0E1A24;--ink-700:#31434F;--ink-500:#5C6E7A;--ink-300:#9FB0BA;--ink-200:#D3DDE3;--ink-100:#E9EFF3;--white:#FFFFFF;--font-display:'Anton',system-ui,sans-serif;--font-body:'Inter',system-ui,sans-serif}`,
+    notes: "Variables available: --blue-600 --blue-700 --cyan-500 --cyan-400 --cyan-100 --cyan-50 --ink-900 --ink-700 --ink-500 --ink-300 --ink-200 --ink-100 --white --font-display (Anton, one weight, never all caps) --font-body (Inter). White or cyan-50 backgrounds, or the ink-900 dark band. No gradients.",
+  },
+};
+
+function assetList(brandId) {
+  try {
+    const m = JSON.parse(fs.readFileSync(path.join(__dirname, "brands", BRANDS[brandId].dir, "manifest.json"), "utf8"));
+    const lines = [];
+    for (const g of m.groups) for (const it of g.items) {
+      if (g.id === "social") continue; // finished posts, not building blocks
+      lines.push(`- /brands/${BRANDS[brandId].dir}/${it.file} (${g.label}${it.w ? `, ${it.w}x${it.h}` : ""})`);
+    }
+    return lines.join("\n");
+  } catch { return ""; }
+}
+
+function sanitizeDesign(html) {
+  return String(html)
+    .replace(/<script[\s\S]*?<\/script>/gi, "")
+    .replace(/<\/?(script|iframe|object|embed|link|meta|base|form)\b[^>]*>/gi, "")
+    .replace(/\son[a-z]+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, "")
+    .replace(/javascript:/gi, "")
+    .replace(/@import[^;]+;/gi, "");
+}
+
+function wrapDesign(brandId, sizeKey, inner) {
+  const [w, h] = SIZES[sizeKey];
+  const b = BRAND_STYLE[brandId] || BRAND_STYLE.locomotepro;
+  return `<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="${b.fonts}"><style>${b.css}
+*{box-sizing:border-box}html,body{margin:0;padding:0;width:${w}px;height:${h}px;overflow:hidden;background:transparent}
+#canvas{width:${w}px;height:${h}px;overflow:hidden;position:relative}</style></head><body>${inner}</body></html>`;
+}
+
+function parseDesign(text) {
+  const d = text.match(/<design>([\s\S]*?)<\/design>/i);
+  const c = text.match(/<caption>([\s\S]*?)<\/caption>/i);
+  let inner = d ? d[1] : (text.match(/```html([\s\S]*?)```/i)?.[1] || "");
+  if (!inner.includes('id="canvas"') && !inner.includes("id='canvas'")) throw new Error("No canvas in design output");
+  return { inner: sanitizeDesign(noDash(inner.trim())), caption: c ? noDash(c[1].trim()) : "" };
+}
+
+const STYLES = {
+  auto: "Choose the layout that best fits the message.",
+  headline: "Bold headline layout: one big statement with a short supporting line and the logo.",
+  stat: "Big number layout: one key figure from the brief, very large, with what it means.",
+  list: "Feature list layout: a heading and 3 to 4 short benefit points with simple inline SVG icons.",
+  product: "Product or app layout: feature the provided app screenshot or product image prominently, with a headline.",
+  offer: "Offer layout: the price or offer is the hero, with what is included and a clear call to action.",
+  quote: "Quote layout: a short quote or testimonial from the brief with attribution.",
+  announcement: "Announcement layout: kicker label, headline, date or detail, and a call to action.",
+};
+
+function designPrompt({ brand, size, brief, style, language, hasPhoto }) {
+  const [w, h, label] = SIZES[size];
+  const b = BRAND_STYLE[brand];
+  return `Design one static social media graphic as HTML and CSS. It will be screenshotted to a PNG exactly as rendered.
+
+Canvas: ${w} x ${h} pixels (${label}).
+Layout direction: ${STYLES[style] || STYLES.auto}
+Language for all text in the graphic and caption: ${language}.
+
+Technical rules:
+- Output a <style> block and a single root <div id="canvas"> containing everything. The canvas is already sized to ${w}x${h}px; position content inside it.
+- Brand CSS variables and fonts are already loaded. ${b.notes}
+- Do not use <script>, <link>, @import, iframes or external URLs. Draw icons and shapes with inline SVG or CSS.
+- Images you may use (absolute paths, only these):
+${assetList(brand)}${hasPhoto ? `\n- {{PHOTO}} (a photo the user uploaded; use it as <img src="{{PHOTO}}"> with object-fit: cover)` : ""}
+- Text must be readable on a phone: for a 1080px wide canvas, body text at least 30px and headlines 70px or larger; scale proportionally for other sizes. Keep generous margins (at least 6% of the width).
+- Keep words few: headline up to 8 words, supporting line up to 16 words, button or call to action up to 4 words.
+- Nothing may overflow or be cut off at the canvas edges.
+- Make it look like a finished piece from this brand's design team: follow the brand book's colours, type, corner radii, spacing, voice and house rules exactly.
+- Use only facts from the brief and the brand guide. Do not invent prices, numbers or claims.
+
+After the design, write the social media caption to post with it (hook first line, short body, one call to action, a few hashtags if the brand uses them).
+
+Output exactly this and nothing else:
+<design>
+<style>...</style>
+<div id="canvas">...</div>
+</design>
+<caption>
+...
+</caption>
+
+Brief:
+${String(brief).slice(0, 3000)}`;
+}
+
+app.post("/api/design", async (req, res) => {
+  if (limited(req.ip)) return res.status(429).json({ error: "Too many requests. Wait a few minutes and try again." });
+  const { brand = "locomotepro", size = "square", brief = "", style = "auto", language = "English", hasPhoto = false, engine = "auto", seed = 0 } = req.body || {};
+  if (!BRANDS[brand] || !SIZES[size]) return res.status(400).json({ error: "Unknown brand or size." });
+  if (!String(brief).trim()) return res.status(400).json({ error: "Describe the post first." });
+  try {
+    const prompt = designPrompt({ brand, size, brief, style, language, hasPhoto }) + (seed ? `\n\nThis is alternative ${seed + 1}: make a clearly different composition from the obvious first idea.` : "");
+    const out = await ask({ system: brandSystem(brand), prompt, maxTokens: 9000, engine });
+    const d = parseDesign(out.text);
+    res.json({ html: wrapDesign(brand, size, d.inner), inner: d.inner, caption: d.caption, engine: LABEL[out.engine], width: SIZES[size][0], height: SIZES[size][1] });
+  } catch (e) {
+    console.error("design:", e.message);
+    res.status(502).json({ error: "The designer couldn't finish this one. Try again, or simplify the brief." });
+  }
+});
+
+app.post("/api/design/revise", async (req, res) => {
+  if (limited(req.ip)) return res.status(429).json({ error: "Too many requests. Wait a few minutes and try again." });
+  const { brand = "locomotepro", size = "square", inner = "", caption = "", instruction = "", hasPhoto = false, engine = "auto" } = req.body || {};
+  if (!BRANDS[brand] || !SIZES[size]) return res.status(400).json({ error: "Unknown brand or size." });
+  if (!String(instruction).trim()) return res.status(400).json({ error: "Say what to change." });
+  const [w, h] = SIZES[size];
+  const prompt = `Here is the current ${w}x${h} graphic and its caption. Apply the requested change and keep everything else the same unless the change requires otherwise. Follow the same technical rules: one <style> block and one <div id="canvas">, brand variables only, no scripts or external URLs, only these images:
+${assetList(brand)}${hasPhoto ? "\n- {{PHOTO}}" : ""}
+Nothing may overflow the canvas.
+
+Requested change: ${String(instruction).slice(0, 1500)}
+
+Current design:
+<design>
+${String(inner).slice(0, 60000)}
+</design>
+<caption>
+${String(caption).slice(0, 4000)}
+</caption>
+
+Output exactly:
+<design>
+...
+</design>
+<caption>
+...
+</caption>`;
+  try {
+    const out = await ask({ system: brandSystem(brand), prompt, maxTokens: 9000, engine });
+    const d = parseDesign(out.text);
+    res.json({ html: wrapDesign(brand, size, d.inner), inner: d.inner, caption: d.caption || caption, engine: LABEL[out.engine], width: w, height: h });
+  } catch (e) {
+    console.error("revise:", e.message);
+    res.status(502).json({ error: "The change didn't go through. Try again or describe it differently." });
   }
 });
 

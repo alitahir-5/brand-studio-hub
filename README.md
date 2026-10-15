@@ -1,8 +1,9 @@
 # Brand Studio Hub
 
-One web app for the team with three tools:
+One web app for the team with four tools:
 
 - **Video Studio**: build short animated videos from scenes, in a brand look (LocomotePro, LocomotePro Light, Surfaced, Surfaced Ink) or a general look. Add a logo and music, draft scenes with AI, and download the finished video (MP4 in Chrome and Edge, WebM elsewhere).
+- **Post Designer**: describe a post and the AI designs it in your brand, the way Claude Design does: real layouts built from the brand colours, fonts, logos and screenshots, at exact social sizes (square, portrait, story, LinkedIn, banner, Facebook cover). Get up to 3 versions, ask for changes in plain words, add your own photo, and download a PNG with a matching caption. Designs cost more than text (roughly 5 to 10 US cents each on Claude Sonnet).
 - **LocomotePro**: colours, type, rules, an AI brand writer (English and Bangla), logos and graphics to download, the full brand book and design guide.
 - **Surfaced Social**: the same for Surfaced, including app screenshots, App Store images, social posts and the Facebook cover.
 

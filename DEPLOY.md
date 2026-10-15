@@ -43,7 +43,8 @@ Check that the repository's top level shows `server.js`, `package.json`, `render
 2. Visit `/api/health` on the same address. You should see both engines listed, for example `"claude":"claude-sonnet-5-5","gemini":"gemini-3.6-flash"`.
 3. In the app, top right, the **AI writer** menu shows Auto, Claude and Gemini.
 4. Go to **LocomotePro > Write**, pick Claude, write a short brief and press **Write**. The status line should say "written by Claude". Switch to Gemini and repeat.
-5. In **Video Studio > Write with AI**, draft scenes, then **Export video** and check the file downloads.
+5. In **Post Designer**, pick a brand, keep the sample brief, press **Design it**, wait about a minute, then **Download PNG**.
+6. In **Video Studio > Write with AI**, draft scenes, then **Export video** and check the file downloads.
 
 ## 5. Share with the team
 
